@@ -148,14 +148,15 @@ int parse_value(mini_group_t *group, char *line)
 
 void add_group(mini_t *mini, mini_group_t *grp)
 {
-    grp->next = mini->root->next;
-    if (mini->root->next)
-        mini->root->next->prev = grp;
-    mini->root->next = grp;
-    grp->prev = mini->root;
+    grp->next = NULL;
+    grp->prev = mini->tail;
+
+    if (mini->tail)
+        mini->tail->next = grp;
+    mini->tail = grp;
 }
 
-mini_group_t *create_group(mini_t *mini, char *name)
+mini_group_t *create_group(mini_t *mini, const char *name)
 {
     mini_group_t *n = NULL;
     n = make_group(name);
@@ -166,9 +167,9 @@ mini_group_t *create_group(mini_t *mini, char *name)
 mini_group_t *get_group(mini_t *mini, char *id, int create)
 {
     if (!id)
-        return mini->root;
+        return mini->head;
 
-    mini_group_t *c = mini->root->next;
+    mini_group_t *c = mini->head->next;
 
     /* Go over all groups on this level */
     while (c) {
@@ -222,15 +223,22 @@ void write_group(const mini_group_t *g, FILE *f)
 
 /* === API implementation === */
 
+mini_t *mini_create(const char *path)
+{
+    mini_t *result =  malloc(sizeof(mini_t));
+    if (path)
+        result->path = strdup(path);
+    result->head = make_group(NULL);
+    result->tail = result->head;
+    return result;
+}
+
 mini_t *mini_try_load_ex(const char *path, int *err)
 {
     mini_t *result = mini_load_ex(path, err);
 
-    if (!result) {
-        result = malloc(sizeof(mini_t));
-        result->path = strdup(path);
-        result->root = make_group(NULL);
-    }
+    if (!result)
+        result = mini_create(path);
     return result;
 }
 
@@ -259,14 +267,11 @@ mini_t *mini_load_ex(const char *path, int *err)
 
 mini_t *mini_loadf_ex(FILE *f, int *err)
 {
-    mini_t *result = malloc(sizeof(mini_t));
+    mini_t *result = mini_create(NULL);
     mini_group_t *current;
     char buffer[MINI_CHUNK_SIZE];
 
-    result->path = NULL;
-    result->root = make_group(NULL);
-
-    current = result->root;
+    current = result->head;
 
     while (fgets(buffer, sizeof(buffer), f)) {
         buffer[MINI_CHUNK_SIZE - 1] = '\0';
@@ -275,7 +280,7 @@ mini_t *mini_loadf_ex(FILE *f, int *err)
             continue;
         } else if (buffer[0] == '[') {
             /* Group header */
-            buffer[strlen(buffer) - 1] = '\0'; /* Remove ']' */
+            buffer[strlen(buffer) - 2] = '\0'; /* Remove ']\n' */
             mini_group_t *n = get_group(result, buffer + 1, 1); /* Skip '[' */
 
             if (n)
@@ -314,11 +319,15 @@ int mini_savef(const mini_t *mini, FILE *f)
     if (!f)
         return MINI_INVALID_ARG;
 
-    mini_group_t *grp = mini->root;
+    mini_group_t *grp = mini->head;
 
     while (grp) {
         write_group(grp, f);
         grp = grp->next;
+        /* Unless this is the last group, add an empty line
+         * to sparate groups */
+        if (grp)
+            fprintf(f, "\n");
     }
     return MINI_OK;
 }
@@ -327,8 +336,9 @@ void mini_free(mini_t *mini)
 {
     if (mini) {
         free(mini->path);
-        free_group_children(mini->root);
+        free_group_children(mini->head);
         mini->path = NULL;
+        mini->tail = NULL;
         free(mini);
     }
 }
@@ -397,13 +407,9 @@ int mini_set_string(mini_t *mini, const char *group, const char *id, const char 
         free(v->val);
         v->val = strdup(val);
     } else{
-        if (!grp) {
-            char *tmp = strdup(group);
-            grp = create_group(mini, tmp);
-            free(tmp);
-        }
-        if (grp)
-            result = add_value(grp, id, val);
+        if (!grp)
+            grp = create_group(mini, group);
+        result = add_value(grp, id, val);
     }
 
     return result;

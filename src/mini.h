@@ -74,9 +74,11 @@ typedef struct mini_group_s {
 
 typedef struct mini_s {
     char *path;
-    mini_group_t *root;
+    mini_group_t *head;
+    mini_group_t *tail;
 } mini_t;
 
+mini_t *mini_create(const char *path);
 
 /* Load from FILE instance, you will have to set path in the returned struct
  * manually otherwise mini_save will not work */
@@ -109,6 +111,11 @@ int mini_savef(const mini_t *mini, FILE *f);
 void mini_free(mini_t *mini);
 
 int mini_value_exists(mini_t *mini, const char *group, const char *id);
+
+static inline int mini_empty(const mini_t *mini)
+{
+    return !mini || !mini->head || !mini->head->value || !mini->head->next;
+}
 
 /* Data creation/retrival/deleting
  * For all set/get methods group can be NULL
