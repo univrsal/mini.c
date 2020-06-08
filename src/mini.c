@@ -27,6 +27,10 @@
  ** SUCH DAMAGE.
  **/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "mini.h"
 #include <malloc.h>
 #include <sys/stat.h>
@@ -468,3 +472,7 @@ double mini_get_double_ex(mini_t *mini, const char *group, const char *id, doubl
     sscanf(val, "%lf", &res);
     return res;
 }
+
+#ifdef __cplusplus
+}
+#endif
