@@ -34,6 +34,12 @@
 extern "C" {
 #endif
 
+#ifdef _MSC_VER
+#define EXPORT __declspec(dllexport)
+#else
+#define EXPORT
+#endif
+
 #include <stdio.h>
 
 #ifndef MINI_CHUNK_SIZE
@@ -78,15 +84,15 @@ typedef struct mini_s {
     mini_group_t *tail;
 } mini_t;
 
-mini_t *mini_create(const char *path);
+EXPORT mini_t *mini_create(const char *path);
 
 /* Load from FILE instance, you will have to set path in the returned struct
  * manually otherwise mini_save will not work */
 /* Loading with optional error code, can be NULL,
  * will contain either MINI_OK, or any MINI_* error*/
-mini_t *mini_load_ex(const char *path, int *err);
-mini_t *mini_loadf_ex(FILE *f, int *err);
-mini_t *mini_try_load_ex(const char *path, int *err);
+EXPORT mini_t *mini_load_ex(const char *path, int *err);
+EXPORT mini_t *mini_loadf_ex(FILE *f, int *err);
+EXPORT mini_t *mini_try_load_ex(const char *path, int *err);
 
 /* Load or return an empty file if it doesn't exist */
 static inline mini_t *mini_try_load(const char *path)
@@ -105,12 +111,12 @@ static inline mini_t *mini_loadf(FILE *f)
     return mini_loadf_ex(f, NULL);
 }
 
-int mini_save(const mini_t *mini);
-int mini_savef(const mini_t *mini, FILE *f);
+EXPORT int mini_save(const mini_t *mini);
+EXPORT int mini_savef(const mini_t *mini, FILE *f);
 
-void mini_free(mini_t *mini);
+EXPORT void mini_free(mini_t *mini);
 
-int mini_value_exists(mini_t *mini, const char *group, const char *id);
+EXPORT int mini_value_exists(mini_t *mini, const char *group, const char *id);
 
 static inline int mini_empty(const mini_t *mini)
 {
@@ -122,18 +128,18 @@ static inline int mini_empty(const mini_t *mini)
  * which will then use the root group.
  */
 
-int mini_delete_value(mini_t *mini, const char *group, const char *id);
-int mini_delete_group(mini_t *mini, const char *group);
+EXPORT int mini_delete_value(mini_t *mini, const char *group, const char *id);
+EXPORT int mini_delete_group(mini_t *mini, const char *group);
 
-int mini_set_string(mini_t *mini, const char *group, const char *id, const char *val);
-int mini_set_int(mini_t *mini, const char *group, const char *id, long long val);
-int mini_set_double(mini_t *mini, const char *group, const char *id, double val);
+EXPORT int mini_set_string(mini_t *mini, const char *group, const char *id, const char *val);
+EXPORT int mini_set_int(mini_t *mini, const char *group, const char *id, long long val);
+EXPORT int mini_set_double(mini_t *mini, const char *group, const char *id, double val);
 
 #define mini_set_bool(m, g, i, v) mini_set_int(m, g, i, v)
 
-const char *mini_get_string_ex(mini_t *mini, const char *group, const char *id, const char *fallback, int *err);
-long long mini_get_int_ex(mini_t *mini, const char *group, const char *id, long long fallback, int *err);
-double mini_get_double_ex(mini_t *mini, const char *group, const char *id, double fallback, int *err);
+EXPORT const char *mini_get_string_ex(mini_t *mini, const char *group, const char *id, const char *fallback, int *err);
+EXPORT long long mini_get_int_ex(mini_t *mini, const char *group, const char *id, long long fallback, int *err);
+EXPORT double mini_get_double_ex(mini_t *mini, const char *group, const char *id, double fallback, int *err);
 
 #define mini_get_bool(m, g, i, v) mini_get_int(m, g, i, v)
 #define mini_get_bool_ex(m, g, i, v, e) mini_get_int_ex(m, g, i, v, e)
