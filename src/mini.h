@@ -120,7 +120,7 @@ EXPORT int mini_value_exists(mini_t *mini, const char *group, const char *id);
 
 static inline int mini_empty(const mini_t *mini)
 {
-    return !mini || !mini->head || !mini->head->value || !mini->head->next;
+    return !mini || !mini->head;
 }
 
 /* Data creation/retrival/deleting
