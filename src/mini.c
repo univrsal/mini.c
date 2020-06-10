@@ -69,7 +69,7 @@ mini_group_t *make_group(const char *name)
 
     g->next = NULL;
     g->prev = NULL;
-    g->value = NULL;
+    g->head = NULL;
     return g;
 }
 
@@ -80,7 +80,7 @@ void free_group(mini_group_t *g)
         g->next = NULL;
         g->prev = NULL;
         g->id = NULL;
-        g->value = NULL;
+        g->head = NULL;
         free(g);
     }
 }
@@ -94,7 +94,7 @@ void free_group_children(mini_group_t *g)
     mini_value_t *cval = NULL, *nval = NULL;
 
     while (cgrp) {
-        cval = cgrp->value;
+        cval = cgrp->head;
         while (cval) {
             nval = cval->next;
             free_value(cval);
@@ -109,7 +109,7 @@ void free_group_children(mini_group_t *g)
 
 mini_value_t *get_group_value(mini_group_t *grp, const char *id)
 {
-    mini_value_t *result = grp->value;
+    mini_value_t *result = grp->head;
     while (result) {
         if (strcmp(result->id, id) == 0)
             return result;
@@ -126,10 +126,15 @@ int add_value(mini_group_t *group, const char *id, const char *val)
     mini_value_t *n = make_value();
     n->id = strdup(id);
     n->val = strdup(val);
-    n->next = group->value;
-    if (group->value)
-        group->value->prev = n;
-    group->value = n;
+    n->next = group->head;
+
+    /* If this is the first value added to this group
+     * we set the tail pointer to this virst value */
+    if (group->head == NULL)
+        group->tail = n;
+    if (group->head)
+        group->head->prev = n;
+    group->head = n;
 
     return MINI_OK;
 }
@@ -143,17 +148,27 @@ int parse_value(mini_group_t *group, char *line)
     else if (get_group_value(group, id))
         return MINI_DUPLICATE_ID;
 
-    return add_value(group, id, strtok(NULL, ""));
+    char *val = strtok(NULL, "");
+    if (val && strlen(val) > 0)
+        val[strlen(val) - 1] = '\0'; /* Get rid of new line */
+    return add_value(group, id, val);
 }
 
 void add_group(mini_t *mini, mini_group_t *grp)
 {
-    grp->next = NULL;
-    grp->prev = mini->tail;
-
-    if (mini->tail)
-        mini->tail->next = grp;
-    mini->tail = grp;
+    if (grp->id == NULL) { /* The root group should always be first */
+        grp->next = mini->head;
+        grp->prev = NULL;
+        if (mini->head)
+            mini->head->prev = grp;
+        mini->head = grp;
+    } else {
+        grp->next = NULL;
+        grp->prev = mini->tail;
+        if (mini->tail)
+            mini->tail->next = grp;
+        mini->tail = grp;
+    }
 }
 
 mini_group_t *create_group(mini_t *mini, const char *name)
@@ -209,15 +224,15 @@ mini_value_t *get_value(mini_t *mini, const char *group, const char *id, int *er
 
 void write_group(const mini_group_t *g, FILE *f)
 {
-    mini_value_t *cval = g->value;
+    mini_value_t *cval = g->tail;
 
     if (g->prev) /* Root group doesn't have a header so it'll skip this */
-        fprintf(f, "[%s]\n",g->id);
+        fprintf(f, "[%s]\n", g->id);
 
     /* Write all values of this group */
     while (cval) {
         fprintf(f, "%s=%s\n", cval->id, cval->val);
-        cval = cval->next;
+        cval = cval->prev;
     }
 }
 
@@ -356,8 +371,8 @@ int mini_delete_value(mini_t *mini, const char *group, const char *id)
             v->next->prev = v->prev;
         if (v->prev)
             v->prev->next = v->next;
-        if (v == grp->value)
-            grp->value = v->next;
+        if (v == grp->head)
+            grp->head = v->next;
         free_value(v);
     }
     return result;

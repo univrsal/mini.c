@@ -75,7 +75,8 @@ typedef struct mini_group_s {
     char *id;                   /* The id of this group                 */
     struct mini_group_s *next;  /* The next group on the same level     */
     struct mini_group_s *prev;
-    mini_value_t *value;        /* The first value for this group       */
+    mini_value_t *head;        /* The first value for this group       */
+    mini_value_t *tail;
 } mini_group_t;
 
 typedef struct mini_s {
@@ -120,7 +121,7 @@ EXPORT int mini_value_exists(mini_t *mini, const char *group, const char *id);
 
 static inline int mini_empty(const mini_t *mini)
 {
-    return !mini || !mini->head;
+    return !mini || !mini->head || !(mini->head->head || mini->head->next);
 }
 
 /* Data creation/retrival/deleting
