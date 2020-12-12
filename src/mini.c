@@ -62,14 +62,9 @@ void free_value(mini_value_t *v)
 mini_group_t *make_group(const char *name)
 {
     mini_group_t *g = malloc(sizeof(mini_group_t));
+	memset(g, 0, sizeof(mini_group_t));
     if (name)
         g->id = strdup(name);
-    else
-        g->id = NULL;
-
-    g->next = NULL;
-    g->prev = NULL;
-    g->head = NULL;
     return g;
 }
 
@@ -222,18 +217,24 @@ mini_value_t *get_value(mini_t *mini, const char *group, const char *id, int *er
     return result;
 }
 
-void write_group(const mini_group_t *g, FILE *f)
+int write_group(const mini_group_t *g, FILE *f)
 {
+	int wrote_something = 0;
     mini_value_t *cval = g->tail;
 
-    if (g->prev) /* Root group doesn't have a header so it'll skip this */
-        fprintf(f, "[%s]\n", g->id);
+	/* Root group doesn't have a header so it'll skip this */
+    if (g->prev) {
+		fprintf(f, "[%s]\n", g->id);
+		wrote_something = 1;
+	}
 
     /* Write all values of this group */
     while (cval) {
         fprintf(f, "%s=%s\n", cval->id, cval->val);
         cval = cval->prev;
+    	wrote_something = 1;
     }
+	return wrote_something;
 }
 
 /* === API implementation === */
@@ -337,11 +338,11 @@ int mini_savef(const mini_t *mini, FILE *f)
     mini_group_t *grp = mini->head;
 
     while (grp) {
-        write_group(grp, f);
+        auto wrote_something = write_group(grp, f);
         grp = grp->next;
         /* Unless this is the last group, add an empty line
          * to sparate groups */
-        if (grp)
+        if (grp && wrote_something)
             fprintf(f, "\n");
     }
     return MINI_OK;
