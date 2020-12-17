@@ -12,3 +12,7 @@ add_executable(minitest
     add_dependencies(minitest minic)
     target_link_libraries(minitest minic)
 endif()
+
+if(WIN32)
+    add_compile_definitions(UNICODE _UNICODE)
+endif()

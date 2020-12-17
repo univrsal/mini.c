@@ -95,6 +95,18 @@ EXPORT mini_t *mini_load_ex(const char *path, int *err);
 EXPORT mini_t *mini_loadf_ex(FILE *f, int *err);
 EXPORT mini_t *mini_try_load_ex(const char *path, int *err);
 
+#if WIN32
+#include <Windows.h>
+#include <tchar.h>
+EXPORT wchar_t *mini_utf8_to_wide_char(const char *utf8);
+EXPORT char *mini_utf8_from_wide_char(const wchar_t *ws);
+EXPORT mini_t *mini_wcreate(const wchar_t *path);
+EXPORT mini_t *mini_wload_ex(const wchar_t *path, int *err);
+EXPORT mini_t *mini_wloadf_ex(FILE *f, int *err);
+EXPORT mini_t *mini_wtry_load_ex(const wchar_t *path, int *err);
+EXPORT int mini_set_wstring(mini_t *mini, const char *group, const char *id, const wchar_t *val);
+
+#endif
 /* Load or return an empty file if it doesn't exist */
 static inline mini_t *mini_try_load(const char *path)
 {
@@ -131,6 +143,7 @@ static inline int mini_empty(const mini_t *mini)
 
 EXPORT int mini_delete_value(mini_t *mini, const char *group, const char *id);
 EXPORT int mini_delete_group(mini_t *mini, const char *group);
+
 
 EXPORT int mini_set_string(mini_t *mini, const char *group, const char *id, const char *val);
 EXPORT int mini_set_int(mini_t *mini, const char *group, const char *id, long long val);
