@@ -47,42 +47,42 @@ extern "C" {
 #endif
 
 enum mini_result {
-    MINI_OK,
-    MINI_INVALID_ARG,
-    MINI_INVALID_PATH,
-    MINI_INVALID_TYPE,
-    MINI_INVALID_ID,
-    MINI_DUPLICATE_ID,
-    MINI_FILE_NOT_FOUND,
-    MINI_GROUP_NOT_FOUND,
-    MINI_VALUE_NOT_FOUND,
-    MINI_ACCESS_DENIED,
-    MINI_READ_ERROR,
-    MINI_CONVERSION_ERROR,
-    /* Flag errors, will occur independently of the above errors */
-    MINI_INVALID_GROUP = 1 << 4,
-    MINI_UNKNOWN
+	MINI_OK,
+	MINI_INVALID_ARG,
+	MINI_INVALID_PATH,
+	MINI_INVALID_TYPE,
+	MINI_INVALID_ID,
+	MINI_DUPLICATE_ID,
+	MINI_FILE_NOT_FOUND,
+	MINI_GROUP_NOT_FOUND,
+	MINI_VALUE_NOT_FOUND,
+	MINI_ACCESS_DENIED,
+	MINI_READ_ERROR,
+	MINI_CONVERSION_ERROR,
+	/* Flag errors, will occur independently of the above errors */
+	MINI_INVALID_GROUP = 1 << 4,
+	MINI_UNKNOWN
 };
 
 typedef struct mini_value_s {
-    char *id;                   /* The id of this item                  */
-    char *val;                  /* The value for this item              */
-    struct mini_value_s *next;  /* The next value in this group         */
-    struct mini_value_s *prev;
+	char *id;                  /* The id of this item                  */
+	char *val;                 /* The value for this item              */
+	struct mini_value_s *next; /* The next value in this group         */
+	struct mini_value_s *prev;
 } mini_value_t;
 
 typedef struct mini_group_s {
-    char *id;                   /* The id of this group                 */
-    struct mini_group_s *next;  /* The next group on the same level     */
-    struct mini_group_s *prev;
-    mini_value_t *head;        /* The first value for this group       */
-    mini_value_t *tail;
+	char *id;                  /* The id of this group                 */
+	struct mini_group_s *next; /* The next group on the same level     */
+	struct mini_group_s *prev;
+	mini_value_t *head; /* The first value for this group       */
+	mini_value_t *tail;
 } mini_group_t;
 
 typedef struct mini_s {
-    char *path;
-    mini_group_t *head;
-    mini_group_t *tail;
+	char *path;
+	mini_group_t *head;
+	mini_group_t *tail;
 } mini_t;
 
 EXPORT mini_t *mini_create(const char *path);
@@ -110,18 +110,18 @@ EXPORT int mini_set_wstring(mini_t *mini, const char *group, const char *id, con
 /* Load or return an empty file if it doesn't exist */
 static inline mini_t *mini_try_load(const char *path)
 {
-    return mini_try_load_ex(path, NULL);
+	return mini_try_load_ex(path, NULL);
 }
 
 /* Load from path */
 static inline mini_t *mini_load(const char *path)
 {
-    return mini_load_ex(path, NULL);
+	return mini_load_ex(path, NULL);
 }
 
 static inline mini_t *mini_loadf(FILE *f)
 {
-    return mini_loadf_ex(f, NULL);
+	return mini_loadf_ex(f, NULL);
 }
 
 EXPORT int mini_save(const mini_t *mini);
@@ -133,7 +133,7 @@ EXPORT int mini_value_exists(mini_t *mini, const char *group, const char *id);
 
 static inline int mini_empty(const mini_t *mini)
 {
-    return !mini || !mini->head || !(mini->head->head || mini->head->next);
+	return !mini || !mini->head || !(mini->head->head || mini->head->next);
 }
 
 /* Data creation/retrival/deleting
@@ -143,7 +143,6 @@ static inline int mini_empty(const mini_t *mini)
 
 EXPORT int mini_delete_value(mini_t *mini, const char *group, const char *id);
 EXPORT int mini_delete_group(mini_t *mini, const char *group);
-
 
 EXPORT int mini_set_string(mini_t *mini, const char *group, const char *id, const char *val);
 EXPORT int mini_set_int(mini_t *mini, const char *group, const char *id, long long val);
@@ -160,17 +159,17 @@ EXPORT double mini_get_double_ex(mini_t *mini, const char *group, const char *id
 
 static inline const char *mini_get_string(mini_t *mini, const char *group, const char *id, const char *fallback)
 {
-    return mini_get_string_ex(mini, group, id, fallback, NULL);
+	return mini_get_string_ex(mini, group, id, fallback, NULL);
 }
 
 static inline long long mini_get_int(mini_t *mini, const char *group, const char *id, long long fallback)
 {
-    return mini_get_int_ex(mini, group, id, fallback, NULL);
+	return mini_get_int_ex(mini, group, id, fallback, NULL);
 }
 
 static inline double mini_get_double(mini_t *mini, const char *group, const char *id, double fallback)
 {
-    return mini_get_double_ex(mini, group, id, fallback, NULL);
+	return mini_get_double_ex(mini, group, id, fallback, NULL);
 }
 
 #ifdef __cplusplus
