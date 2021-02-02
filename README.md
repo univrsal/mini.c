@@ -1,7 +1,7 @@
 # mini.c
 Minimal ini file read/write library.
 - Plain C
-- Split into one header and one implementaion file
+- Split into one header and one implementation file
 - < 600 LOC
 - Supports strings, integers, floats
 - Simple interface
