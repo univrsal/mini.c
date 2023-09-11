@@ -43,10 +43,10 @@ if (mini_delete_value(ini, "test_group", "id") != MINI_OK) {
     printf("Value %s in group %s deleted\n", "id", "test_group");
 }
 
-if (mini_delete_value(ini, "missin_group", "id") != MINI_OK) {
+if (mini_delete_value(ini, "missing_group", "id") != MINI_OK) {
     printf("Value %s in group %s not found\n", "id", "missing_group");
 }
 
-mini_save(ini); // Write to disk
+mini_save(ini, MINI_FLAGS_SKIP_EMPTY_GROUPS); // Write to disk
 mini_free(ini); // Free memory
 ```

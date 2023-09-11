@@ -64,6 +64,11 @@ enum mini_result {
 	MINI_UNKNOWN
 };
 
+enum mini_flags {
+	MINI_FLAGS_NONE = 0,
+	MINI_FLAGS_SKIP_EMPTY_GROUPS = 1 << 0,
+};
+
 typedef struct mini_value_s {
 	char *id;                  /* The id of this item                  */
 	char *val;                 /* The value for this item              */
@@ -75,7 +80,7 @@ typedef struct mini_group_s {
 	char *id;                  /* The id of this group                 */
 	struct mini_group_s *next; /* The next group on the same level     */
 	struct mini_group_s *prev;
-	mini_value_t *head; /* The first value for this group       */
+	mini_value_t *head;        /* The first value for this group       */
 	mini_value_t *tail;
 } mini_group_t;
 
@@ -124,8 +129,8 @@ static inline mini_t *mini_loadf(FILE *f)
 	return mini_loadf_ex(f, NULL);
 }
 
-EXPORT int mini_save(const mini_t *mini);
-EXPORT int mini_savef(const mini_t *mini, FILE *f);
+EXPORT int mini_save(const mini_t *mini, int flags);
+EXPORT int mini_savef(const mini_t *mini, FILE *f, int flags);
 
 EXPORT void mini_free(mini_t *mini);
 
