@@ -1,6 +1,6 @@
 /**
  ** This file is part of the minic project.
- ** Copyright 2020 univrsal <uni@vrsal.cf>.
+ ** Copyright 2023 univrsal <uni@vrsal.xyz>.
  ** All rights reserved.
  **
  ** Redistribution and use in source and binary forms, with or without
